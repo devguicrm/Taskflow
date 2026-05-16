@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="TaskFlow: gerenciador de tarefas avançado com filtros, prioridades, categorias e LocalStorage." />
+  <title>TaskFlow | Gerenciador de Tarefas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="#" class="brand" aria-label="TaskFlow">
+        <span><i class="fa-solid fa-check"></i></span>
+        <div>
+          <strong>TaskFlow</strong>
+          <small>Gerenciador de tarefas</small>
+        </div>
+      </a>
+
+      <nav class="sidebar-nav" aria-label="Filtros de navegação">
+        <button class="nav-pill active" data-status-filter="all"><i class="fa-solid fa-layer-group"></i> Todas</button>
+        <button class="nav-pill" data-status-filter="pending"><i class="fa-regular fa-clock"></i> Pendentes</button>
+        <button class="nav-pill" data-status-filter="completed"><i class="fa-solid fa-circle-check"></i> Concluídas</button>
+        <button class="nav-pill" data-status-filter="today"><i class="fa-solid fa-calendar-day"></i> Para hoje</button>
+        <button class="nav-pill" data-status-filter="late"><i class="fa-solid fa-triangle-exclamation"></i> Atrasadas</button>
+      </nav>
+
+      <div class="sidebar-card">
+        <span>Produtividade</span>
+        <strong id="sidebarProgress">0%</strong>
+        <div class="progress-line"><span id="sidebarProgressBar"></span></div>
+        <p>Complete tarefas para aumentar sua taxa de conclusão.</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">Organização pessoal</span>
+          <h1>Lista de tarefas avançada</h1>
+          <p>Cadastre, edite, filtre e acompanhe suas tarefas em uma interface moderna.</p>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+          <button class="btn-primary" id="openTaskModal"><i class="fa-solid fa-plus"></i> Nova tarefa</button>
+        </div>
+      </header>
+
+      <section class="stats-grid" aria-label="Resumo das tarefas">
+        <article class="stat-card">
+          <span>Total</span>
+          <strong id="totalTasks">0</strong>
+          <i class="fa-solid fa-list-check"></i>
+        </article>
+        <article class="stat-card warning">
+          <span>Pendentes</span>
+          <strong id="pendingTasks">0</strong>
+          <i class="fa-regular fa-clock"></i>
+        </article>
+        <article class="stat-card success">
+          <span>Concluídas</span>
+          <strong id="completedTasks">0</strong>
+          <i class="fa-solid fa-circle-check"></i>
+        </article>
+        <article class="stat-card danger">
+          <span>Atrasadas</span>
+          <strong id="lateTasks">0</strong>
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </article>
+      </section>
+
+      <section class="controls-panel">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="search" id="searchInput" placeholder="Buscar por título, descrição ou categoria..." />
+        </div>
+
+        <select id="priorityFilter" aria-label="Filtrar por prioridade">
+          <option value="all">Todas as prioridades</option>
+          <option value="Alta">Alta prioridade</option>
+          <option value="Média">Média prioridade</option>
+          <option value="Baixa">Baixa prioridade</option>
+        </select>
+
+        <select id="categoryFilter" aria-label="Filtrar por categoria">
+          <option value="all">Todas as categorias</option>
+          <option value="Estudos">Estudos</option>
+          <option value="Trabalho">Trabalho</option>
+          <option value="Pessoal">Pessoal</option>
+          <option value="Projetos">Projetos</option>
+        </select>
+      </section>
+
+      <section class="task-board">
+        <div class="board-header">
+          <h2>Tarefas</h2>
+          <div class="board-actions">
+            <button class="btn-soft" id="completeAll"><i class="fa-solid fa-check-double"></i> Concluir todas</button>
+            <button class="btn-soft danger-soft" id="clearCompleted"><i class="fa-solid fa-trash"></i> Limpar concluídas</button>
+          </div>
+        </div>
+
+        <div class="task-list" id="taskList"></div>
+
+        <div class="empty-state" id="emptyState">
+          <i class="fa-regular fa-clipboard"></i>
+          <h3>Nenhuma tarefa encontrada</h3>
+          <p>Crie uma nova tarefa ou ajuste os filtros para visualizar seus compromissos.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="taskModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <div>
+          <span class="eyebrow">TaskFlow</span>
+          <h2 id="modalTitle">Nova tarefa</h2>
+        </div>
+        <button class="icon-btn" data-close-modal aria-label="Fechar modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="taskForm" class="task-form">
+        <input type="hidden" id="taskId" />
+
+        <div class="form-group">
+          <label for="taskTitle">Título</label>
+          <input type="text" id="taskTitle" placeholder="Ex: Mandar E-mail" required />
+        </div>
+
+        <div class="form-group">
+          <label for="taskDescription">Descrição</label>
+          <textarea id="taskDescription" rows="4" placeholder="Descreva os detalhes da tarefa..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskCategory">Categoria</label>
+            <select id="taskCategory" required>
+              <option value="Estudos">Estudos</option>
+              <option value="Trabalho">Trabalho</option>
+              <option value="Pessoal">Pessoal</option>
+              <option value="Projetos">Projetos</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="taskPriority">Prioridade</label>
+            <select id="taskPriority" required>
+              <option value="Baixa">Baixa</option>
+              <option value="Média">Média</option>
+              <option value="Alta">Alta</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskDueDate">Data limite</label>
+            <input type="date" id="taskDueDate" />
+          </div>
+
+          <div class="form-group">
+            <label for="taskTag">Etiqueta</label>
+            <input type="text" id="taskTag" placeholder="Ex: urgente, faculdade..." />
+          </div>
+        </div>
+
+        <button class="btn-primary full" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar tarefa</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
