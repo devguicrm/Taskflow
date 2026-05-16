@@ -4,7 +4,7 @@ Projeto de uma aplicação web responsiva para gerenciamento de tarefas, desenvo
 
 ## 🔗 Acesse o projeto
 
-[Ver projeto publicado](COLOQUE_AQUI_O_LINK_DO_GITHUB_PAGES)
+[Ver projeto publicado]((https://devguicrm.github.io/Taskflow/))
 
 ## 📌 Sobre
 
@@ -47,4 +47,4 @@ taskflow-todo/
 
 ## 👨‍💻 Desenvolvedor
 
-Desenvolvido por **Guilherme CRM** para portfólio front-end.
+Desenvolvido por **Guilherme CRM**.
